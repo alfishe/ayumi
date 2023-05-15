@@ -22,5 +22,9 @@ set(SOURCES
 # Create the executable target
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Executable will be generated with 'ayumi_render' name
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ayumi_render")
+
+
 # Set any additional compiler flags
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
