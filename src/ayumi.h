@@ -3,58 +3,89 @@
 #ifndef AYUMI_H
 #define AYUMI_H
 
-enum {
-  TONE_CHANNELS = 3,
-  DECIMATE_FACTOR = 8,
-  FIR_SIZE = 192,
-  DC_FILTER_SIZE = 1024
+enum
+{
+    TONE_CHANNELS = 3,
+    DECIMATE_FACTOR = 8,
+    FIR_SIZE = 192,
+    DC_FILTER_SIZE = 1024
 };
 
-struct tone_channel {
-  int tone_period;
-  int tone_counter;
-  int tone;
-  int t_off;
-  int n_off;
-  int e_on;
-  int volume;
-  double pan_left;
-  double pan_right;
+struct tone_channel
+{
+    int tone_period;
+    int tone_counter;
+    int tone;
+    int t_off;
+    int n_off;
+    int e_on;
+    int volume;
+    double pan_left;
+    double pan_right;
 };
 
-struct interpolator {
-  double c[4];
-  double y[4];
+struct interpolator
+{
+    double c[4];
+    double y[4];
 };
 
-struct dc_filter {
-  double sum;
-  double delay[DC_FILTER_SIZE];
+struct dc_filter
+{
+    double sum;
+    double delay[DC_FILTER_SIZE];
 };
 
-struct ayumi {
-  struct tone_channel channels[TONE_CHANNELS];
-  int noise_period;
-  int noise_counter;
-  int noise;
-  int envelope_counter;
-  int envelope_period;
-  int envelope_shape;
-  int envelope_segment;
-  int envelope;
-  const double* dac_table;
-  double step;
-  double x;
-  struct interpolator interpolator_left;
-  struct interpolator interpolator_right;
-  double fir_left[FIR_SIZE * 2];
-  double fir_right[FIR_SIZE * 2];
-  int fir_index;
-  struct dc_filter dc_left;
-  struct dc_filter dc_right;
-  int dc_index;
-  double left;
-  double right;
+struct ayumi
+{
+    struct tone_channel channels[TONE_CHANNELS];
+    int noise_period;
+    int noise_counter;
+    int noise;
+    int envelope_counter;
+    int envelope_period;
+    int envelope_shape;
+    int envelope_segment;
+    int envelope;
+    const double* dac_table;
+    double step;
+    double x;
+    struct interpolator interpolator_left;
+    struct interpolator interpolator_right;
+    double fir_left[FIR_SIZE * 2];
+    double fir_right[FIR_SIZE * 2];
+    int fir_index;
+    struct dc_filter dc_left;
+    struct dc_filter dc_right;
+    int dc_index;
+    double left;
+    double right;
+};
+
+static const double fir_coeff[] =
+{
+    -0.0000046183113992051936, -0.000011177616408872250, -0.000018610264502005432, -0.000025134586135631012,
+    -0.0000284942816906661970, -0.000026396828793275159, -0.000017094212558802156,  0.000023798193576966866,
+     0.0000512811602422021830,  0.000077621978262434270,  0.000096759426664120416,  0.000102402293003934020,
+     0.0000893446142180771060,  0.000054875700118949183, -0.000069839082210680165, -0.000144796613236075700,
+    -0.0002115845291770830800, -0.000255350691065505440, -0.000262287143743221040, -0.000222588059270277990,
+    -0.0001332323049569570400,  0.000161825787670552060,  0.000328461753850965810,  0.000470456115761848630,
+     0.0005571385145753094400,  0.000562125651215187260,  0.000469019185539624780,  0.000276248668389529860,
+    -0.0003256417948683862200, -0.000651823102867103880, -0.000921277873093192980, -0.001077253434894357500,
+    -0.0010737727700273478000, -0.000885566453903926340, -0.000515818960907655340,  0.000595487671937952770,
+     0.0011803558710661009000,  0.001652732027036987100,  0.001915267933096555500,  0.001892732480538153800,
+     0.0015481870327877937000,  0.000894706958349413060, -0.001017822587820612500, -0.002003740055205429200,
+    -0.0027874356824117317000, -0.003210329988021943000, -0.003154062411798439500, -0.002565716365190034500,
+    -0.0014750752642111449000,  0.001662416544637846200,  0.003259119283906917900,  0.004516568581586774700,
+     0.0051838984346123896000,  0.005077426469745993300,  0.004119252141414158500,  0.002362857541796649100,
+    -0.0026543507866759182000, -0.005199025108433342500, -0.007202023823465692400, -0.008267292819200735800,
+    -0.0081033739572956287000, -0.006583111539570221000, -0.003783904041529238600,  0.004278125285115250700,
+     0.0084176358598320178000,  0.011725660574630550000,  0.013550476647788672000,  0.013388189369997496000,
+     0.0109795012423412590000,  0.006381274941685413000, -0.007421229604153888000, -0.014864563043402130000,
+    -0.0211435846221781040000, -0.025042750587586090000, -0.025473530942547201000, -0.021627310017882196000,
+    -0.0131043233832255430000,  0.017065133989980476000,  0.036978919264451952000,  0.058233180620939580000,
+     0.0790720120814059490000,  0.097675998716952317000,  0.112360459369509320000,  0.121763435772877310000,
+     0.125
 };
 
 int ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr);
