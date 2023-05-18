@@ -47,17 +47,22 @@ struct ayumi
     int envelope_shape;
     int envelope_segment;
     int envelope;
-    const double* dac_table;
-    double step;
+
+    const double* dac_table_ptr;
+    double step;    // Number of AY clock cycles per audio sample (oversampling on, sample rate x OVERSAMPLE_FACTOR)
+
     double x;
     struct interpolator interpolator_left;
     struct interpolator interpolator_right;
+
     double fir_left[FIR_SIZE * 2];
     double fir_right[FIR_SIZE * 2];
     int fir_index;
+
     struct dc_filter dc_left;
     struct dc_filter dc_right;
     int dc_index;
+
     double left;
     double right;
 };

@@ -72,9 +72,11 @@ void ayumi_render(struct ayumi *ay, struct text_data *t, float *sample_data)
     int frame = 0;
     double isr_step = t->frame_rate / t->sample_rate;
     double isr_counter = 1;
-    float *out = sample_data;
+    float *out_ptr = sample_data;
+
     while (frame < t->frame_count)
     {
+        // Handle interrupt
         isr_counter += isr_step;
         if (isr_counter >= 1)
         {
@@ -82,14 +84,20 @@ void ayumi_render(struct ayumi *ay, struct text_data *t, float *sample_data)
             update_ayumi_state(ay, &t->frame_data[frame * 16]);
             frame += 1;
         }
+
+        // Generate next sample
         ayumi_process(ay);
+
+        // Apply DC rejection filter if requested
         if (t->dc_filter_on)
         {
             ayumi_remove_dc(ay);
         }
-        out[0] = (float) (ay->left * t->volume);
-        out[1] = (float) (ay->right * t->volume);
-        out += 2;
+
+        // Store rendered samples to output buffer
+        out_ptr[0] = (float) (ay->left * t->volume);
+        out_ptr[1] = (float) (ay->right * t->volume);
+        out_ptr += 2;
     }
 }
 
@@ -100,7 +108,10 @@ void set_default_text_data(struct text_data *t)
     t->eqp_stereo_on = 0;
     t->dc_filter_on = 1;
     t->is_ym = 1;
-    t->clock_rate = 2000000;
+    // t->clock_rate = 2000000; // Other platforms
+    t->clock_rate = 1750000; // Pentagon 128k
+    // t->clock_rate = 17734; // ZX-Spectrum 128K
+
     t->frame_rate = 50;
 }
 
@@ -130,6 +141,7 @@ int main(int argc, char **argv)
         printf("No frames\n");
         return 1;
     }
+
     sample_data = (float *) malloc(sample_count * sizeof(float) * 2);
     if (sample_data == NULL)
     {

@@ -4,6 +4,8 @@
 #include <math.h>
 #include "ayumi.h"
 
+/// region <Constants>
+
 static const double AY_dac_table[] =
 {
     0.0, 0.0,
@@ -44,6 +46,8 @@ static const double YM_dac_table[] =
     0.879926756695, 1.0
 };
 
+/// endregion </Constants>
+
 static void reset_segment(struct ayumi *ay);
 
 static int update_tone(struct ayumi *ay, int index)
@@ -65,15 +69,20 @@ static int update_noise(struct ayumi *ay)
     int bit0x3;
 
     ay->noise_counter += 1;
+
     if (ay->noise_counter >= (ay->noise_period << 1))
     {
         ay->noise_counter = 0;
+
+
         bit0x3 = ((ay->noise ^ (ay->noise >> 3)) & 1);
         ay->noise = (ay->noise >> 1) | (bit0x3 << 16);
     }
 
     return ay->noise & 1;
 }
+
+/// region <Envelope>
 
 static void slide_up(struct ayumi *ay)
 {
@@ -151,6 +160,10 @@ int update_envelope(struct ayumi *ay)
     return ay->envelope;
 }
 
+/// endregion </Envelope>
+
+/// region <Mixer>
+
 static void update_mixer(struct ayumi *ay)
 {
     int i;
@@ -165,10 +178,13 @@ static void update_mixer(struct ayumi *ay)
     {
         out = (update_tone(ay, i) | ay->channels[i].t_off) & (noise | ay->channels[i].n_off);
         out *= ay->channels[i].e_on ? envelope : ay->channels[i].volume * 2 + 1;
-        ay->left += ay->dac_table[out] * ay->channels[i].pan_left;
-        ay->right += ay->dac_table[out] * ay->channels[i].pan_right;
+
+        ay->left += ay->dac_table_ptr[out] * ay->channels[i].pan_left;
+        ay->right += ay->dac_table_ptr[out] * ay->channels[i].pan_right;
     }
 }
+
+/// endregion </Mixer>
 
 int ayumi_configure(struct ayumi *ay, int is_ym, double clock_rate, int sr)
 {
@@ -176,7 +192,7 @@ int ayumi_configure(struct ayumi *ay, int is_ym, double clock_rate, int sr)
     memset(ay, 0, sizeof(struct ayumi));
 
     ay->step = clock_rate / (sr * 8 * DECIMATE_FACTOR);
-    ay->dac_table = is_ym ? YM_dac_table : AY_dac_table;
+    ay->dac_table_ptr = is_ym ? YM_dac_table : AY_dac_table;
     ay->noise = 1;
     ayumi_set_envelope(ay, 1);
 
