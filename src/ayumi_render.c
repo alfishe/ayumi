@@ -76,10 +76,10 @@ void ayumi_render(struct ayumi *ay, struct text_data *t, float *sample_data)
 
     while (frame < t->frame_count)
     {
-        // Handle interrupt
         isr_counter += isr_step;
         if (isr_counter >= 1)
         {
+            // Load data to AY registers each frame (50 Hz framerate)
             isr_counter -= 1;
             update_ayumi_state(ay, &t->frame_data[frame * 16]);
             frame += 1;
