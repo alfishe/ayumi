@@ -191,7 +191,8 @@ int ayumi_configure(struct ayumi *ay, int is_ym, double clock_rate, int sr)
     int i;
     memset(ay, 0, sizeof(struct ayumi));
 
-    ay->step = clock_rate / (sr * 8 * DECIMATE_FACTOR);
+    double oversample_stream_rate = sr * 8 * DECIMATE_FACTOR; // 2822400 bits per second for 44100Hz sample rate
+    ay->step = clock_rate / oversample_stream_rate;           // How many AY chip clock cycles are corresponding to 1 bit for oversampled audio stream
     ay->dac_table_ptr = is_ym ? YM_dac_table : AY_dac_table;
     ay->noise = 1;
     ayumi_set_envelope(ay, 1);
